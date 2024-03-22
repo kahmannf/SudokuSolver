@@ -11,7 +11,7 @@ The recursive solving Methode allows two strategies for solving:
 - `RecursiveStrategie.PreferSimpleSolution`
 - `RecursiveStrategie.AllowMaxComplexity`
 
-When searching for solutions with `PreferSimpleSolution`, the solver will retry solving all cells with a simpler `SolutionStrategy` if a solution for any cell is found. When searching with `AllowMaxComplexity`, all `SolutionStrategy`s will be used to find Solutions before before a neww iteration of all cells is started.
+When searching for solutions with `PreferSimpleSolution`, the solver will retry solving all cells with a simpler `SolutionStrategy` if a solution for any cell is found. When searching with `AllowMaxComplexity`, all `SolutionStrategy`s will be used to find Solutions before before a new iteration of all cells is started.
 
 
 
