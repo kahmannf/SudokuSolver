@@ -1,0 +1,62 @@
+﻿<Window x:Class="SudokuSolver.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SudokuSolver"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Window.DataContext>
+        <local:MainViewModel></local:MainViewModel>
+    </Window.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="50" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="200" />
+        </Grid.ColumnDefinitions>
+        <Menu Grid.Row="0" Grid.ColumnSpan="2">
+            <MenuItem Header="File"></MenuItem>
+            <MenuItem Header="Sudoku">
+                <MenuItem Header="Create New"></MenuItem>
+                <MenuItem Header="Load" x:Name="MenuItemLoad">
+                </MenuItem>
+                <MenuItem Header="Debug">
+                    <MenuItem Header="Trigger Error Check" Click="MenuItemTriggerErrorCheck_Click"></MenuItem>
+                    <MenuItem Header="Solve Selected Cell" Click="MenuItemSolveSelectedCell_Click"></MenuItem>
+                </MenuItem>
+                <MenuItem Header="Clear" Click="MenuItemClear_Click"></MenuItem>
+            </MenuItem>
+        </Menu>
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal">
+            <Button Height="30" Content="Solve Selected Cell" Click="MenuItemSolveSelectedCell_Click"></Button>
+            <Button Height="30" Content="Mark solvable Cells" Click="ButtonFindSolvableCells_Click"></Button>
+            <Button Height="30" Content="Mark Recursive Simple" Click="ButtonFindSolvableCellsRecursiveSimple_Click"></Button>
+            <Button Height="30" Content="Mark Recursive Complex" Click="ButtonFindSolvableCellsRecursiveComplex_Click"></Button>
+            <Button Height="30" Content="Solve solvable Cells" Click="ButtonApplySolvableCells_Click"></Button>
+        </StackPanel>
+        <Border x:Name="MainBorder" Grid.Row="2"  BorderThickness="1" Width="272" Height="272" BorderBrush="Black">
+
+        </Border>
+        <StackPanel Grid.Row="2" Grid.Column="1">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Iterations"></Label>
+                <Label Content="{Binding Iterations}"></Label>
+            </StackPanel>
+            <ItemsControl ItemsSource="{Binding SolutionLegendItems}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Border BorderBrush="{Binding Color}" BorderThickness="1" Background="{Binding Color}" Width="20" Height="20"></Border>
+                            <Label Content="{Binding SolutionStrategieName}"></Label>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </Grid>
+</Window>
