@@ -28,16 +28,29 @@ namespace SudokuSolver
         SimpleColumnExclusion = 4,
 
         /// <summary>
-        /// Like simple block exclusion, but additional contraints will be checked
+        /// Like simple block exclusion, but additional contraints will be checked, recursing the contriants check once
         /// </summary>
-        BlockExclusionWithContraints = 5,
+        BlockExclusionWithContraintsR1 = 8,
         /// <summary>
-        /// Like simple row exclusion, but additional contraints will be checked
+        /// Like simple row exclusion, but additional contraints will be checked, recursing the contriants check once
         /// </summary>
-        RowExclusionWithContraints = 6,
+        RowExclusionWithContraintsR1 = 9,
         /// <summary>
-        /// Like simple column exclusion, but additional contraints will be checked
+        /// Like simple column exclusion, but additional contraints will be checked, recursing the contriants check once
         /// </summary>
-        ColumnExclusionWithContraints = 7,
+        ColumnExclusionWithContraintsR1 = 10,
+
+        /// <summary>
+        /// Like simple block exclusion, but additional contraints will be checked, recursing the contriants check twice
+        /// </summary>
+        BlockExclusionWithContraintsR2 = 11,
+        /// <summary>
+        /// Like simple row exclusion, but additional contraints will be checked, recursing the contriants check twice
+        /// </summary>
+        RowExclusionWithContraintsR2 = 12,
+        /// <summary>
+        /// Like simple column exclusion, but additional contraints will be checked, recursing the contriants check twice
+        /// </summary>
+        ColumnExclusionWithContraintsR2 = 13
     }
 }

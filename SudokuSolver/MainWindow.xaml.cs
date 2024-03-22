@@ -33,16 +33,23 @@ namespace SudokuSolver
             { "SimpleRow", Examples.SimpleSolve },
             { "Simple Block Exclusion", Examples.SimpleBlockExclusion },
             { "Simple Row Exclusion", Examples.SimpleRowExclusion },
-            { "Simple Column Exclusion", Examples.SimpleColumnExclusion }
+            { "Simple Column Exclusion", Examples.SimpleColumnExclusion },
+            { "Block Exclusion with Contraints R1", Examples.ContrainsR1Example }
         };
 
         Dictionary<SolutionStrategie, Color> solutionColors = new Dictionary<SolutionStrategie, Color>()
         {
             { SolutionStrategie.None, Colors.Transparent },
-            { SolutionStrategie.CombinedRemainingNumber, Colors.Yellow },
-            { SolutionStrategie.SimpleBlockExclusion, Colors.Lime },
-            { SolutionStrategie.SimpleRowExclusion, Colors.DarkGreen },
-            { SolutionStrategie.SimpleColumnExclusion, Colors.DarkKhaki }
+            { SolutionStrategie.CombinedRemainingNumber, Colors.Lime  },
+            { SolutionStrategie.SimpleBlockExclusion, Colors.DarkKhaki },
+            { SolutionStrategie.SimpleRowExclusion, Colors.DarkKhaki  },
+            { SolutionStrategie.SimpleColumnExclusion, Colors.DarkKhaki },
+            { SolutionStrategie.BlockExclusionWithContraintsR1, Colors.Orange },
+            { SolutionStrategie.RowExclusionWithContraintsR1, Colors.Orange },
+            { SolutionStrategie.ColumnExclusionWithContraintsR1, Colors.Orange },
+            { SolutionStrategie.BlockExclusionWithContraintsR2, Colors.Pink },
+            { SolutionStrategie.RowExclusionWithContraintsR2, Colors.Pink },
+            { SolutionStrategie.ColumnExclusionWithContraintsR2, Colors.Pink },
         };
 
         (int, int)? selectedCell;
@@ -353,6 +360,67 @@ namespace SudokuSolver
                 usedStrageties.Add(solution.WinningStrategie);
             }
             (DataContext as MainViewModel).SetSolutionLegend(usedStrageties, solutionColors, result.IterationCount);
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(selectedCell == null)
+            {
+                return;
+            }
+
+            if(sudoku.Grid[selectedCell.Value.Item1][selectedCell.Value.Item2] != null)
+            {
+                return;
+            }
+
+            int number = 0;
+
+            switch(e.Key)
+            {
+                case Key.D1:
+                case Key.NumPad1:
+                    number = 1;
+                    break;
+                case Key.D2:
+                case Key.NumPad2:
+                    number = 2;
+                    break;
+                case Key.D3:
+                case Key.NumPad3:
+                    number = 3;
+                    break;
+                case Key.D4:
+                case Key.NumPad4:
+                    number = 4;
+                    break;
+                case Key.D5:
+                case Key.NumPad5:
+                    number = 5;
+                    break;
+                case Key.D6:
+                case Key.NumPad6:
+                    number = 6;
+                    break;
+                case Key.D7:
+                case Key.NumPad7:
+                    number = 7;
+                    break;
+                case Key.D8:
+                case Key.NumPad8:
+                    number = 8;
+                    break;
+                case Key.D9:
+                case Key.NumPad9:
+                    number = 9;
+                    break;
+
+            }
+
+            if (number != 0)
+            {
+                SetCell(selectedCell.Value.Item1, selectedCell.Value.Item2, number);
+            }
         }
     }
 }

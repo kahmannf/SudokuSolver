@@ -18,9 +18,12 @@ namespace SudokuSolver
             strategies.Add(SolutionStrategie.SimpleBlockExclusion, BlockExclusionFactory(CanNumberBePlacedSimple));
             strategies.Add(SolutionStrategie.SimpleRowExclusion, RowExclusionFactory(CanNumberBePlacedSimple));
             strategies.Add(SolutionStrategie.SimpleColumnExclusion, ColumnExclusionFactory(CanNumberBePlacedSimple));
-            strategies.Add(SolutionStrategie.BlockExclusionWithContraints, BlockExclusionFactory(CanNumberBePlacedWithConstraints));
-            strategies.Add(SolutionStrategie.RowExclusionWithContraints, RowExclusionFactory(CanNumberBePlacedWithConstraints));
-            strategies.Add(SolutionStrategie.ColumnExclusionWithContraints, ColumnExclusionFactory(CanNumberBePlacedWithConstraints));
+            strategies.Add(SolutionStrategie.BlockExclusionWithContraintsR1, BlockExclusionFactory(CanNumberBePlacedWithConstraintsFactory(1)));
+            strategies.Add(SolutionStrategie.RowExclusionWithContraintsR1, RowExclusionFactory(CanNumberBePlacedWithConstraintsFactory(1)));
+            strategies.Add(SolutionStrategie.ColumnExclusionWithContraintsR1, ColumnExclusionFactory(CanNumberBePlacedWithConstraintsFactory(1)));
+            strategies.Add(SolutionStrategie.BlockExclusionWithContraintsR2, BlockExclusionFactory(CanNumberBePlacedWithConstraintsFactory(2)));
+            strategies.Add(SolutionStrategie.RowExclusionWithContraintsR2, RowExclusionFactory(CanNumberBePlacedWithConstraintsFactory(2)));
+            strategies.Add(SolutionStrategie.ColumnExclusionWithContraintsR2, ColumnExclusionFactory(CanNumberBePlacedWithConstraintsFactory(2)));
 
             Grid = new int?[9][];
 
@@ -40,7 +43,7 @@ namespace SudokuSolver
             return Grid[x];
         }
 
-        public int?[][] Block(int xBlock, int yBlock)
+        public Block Block(int xBlock, int yBlock)
         {
             int?[][] result = new int?[3][];
 
@@ -56,7 +59,7 @@ namespace SudokuSolver
                 }
             }
 
-            return result;
+            return new Block(result, xBlock, yBlock);
         }
 
         public void Parse(string sudoku)
@@ -155,6 +158,13 @@ namespace SudokuSolver
             if (recursiveSolvingOptions.AllowedStrategies.Count == 0)
             {
                 return new RecursiveSolveResult();
+            }
+
+            if (recursiveSolvingOptions.RecursiveStrategie == RecursiveStrategie.AllowMaxComplexity
+                &&
+                recursiveSolvingOptions.AllowedStrategies.Any(x => x.ToString().Contains("R5") || x.ToString().Contains("R10")))
+            {
+                // ahst to do here? exception or other? solving with max complexity with that many recursions takes very long
             }
 
             var target = Copy();
@@ -333,7 +343,7 @@ namespace SudokuSolver
             return allNumbers.Distinct().ToList();
         }
 
-        private List<(int,int)> GetEmptyCellsInBlock(int?[][] block, int xBlockOffset, int yBlockOffset)
+        private List<(int,int)> GetEmptyCellsInBlock(Block block)
         {
             List<(int,int)> result = new List<(int,int)> ();
             for (var x = 0; x < 3; x++)
@@ -342,7 +352,7 @@ namespace SudokuSolver
                 {
                     if (block[x][y] == null)
                     {
-                        result.Add((x + xBlockOffset, y + yBlockOffset));
+                        result.Add((x + block.XOffset, y + block.YOffset));
                     }
                 }
             }
@@ -396,12 +406,78 @@ namespace SudokuSolver
             return allNumbers.All(ntest => ntest != n);
         }
 
-        public bool CanNumberBePlacedWithConstraints(int x, int y, int n)
+        public Func<int, int, int, bool> CanNumberBePlacedWithConstraintsFactory(int maxRecursionLevel)
         {
-            if (!CanNumberBePlacedSimple(x, y, n))
+            return (x, y, n) => CanNumberBePlacedWithConstraintsRecursive(x, y, n, 0, maxRecursionLevel);
+        }
+
+        private bool CanNumberBePlacedWithConstraintsRecursive(int x, int y, int n, int currentRecursionLevel, int maxRecursionLevel)
+        {
+            var canBePlacedSimple = CanNumberBePlacedSimple(x, y, n);
+            if (!canBePlacedSimple || currentRecursionLevel == maxRecursionLevel) 
             {
-                return false;
+                return canBePlacedSimple;
             }
+
+            // first find constrainable block (block on same xBlock/yBlock that do not have "n")
+            int xBlock = x / 3;
+            int yBlock = y / 3;
+
+            List<Block> constrainableBlocks = new List<Block>();
+
+            for(int xB = 0; xB < 3; xB++)
+            {
+                if (xB != xBlock)
+                {
+                    var block = Block(xB, yBlock);
+                    if (!block.Contains(n))
+                    {
+                        constrainableBlocks.Add(block);
+                    }
+                }
+            }
+
+            for (int yB = 0; yB < 3; yB++)
+            {
+                if (yB != yBlock)
+                {
+                    var block = Block(xBlock, yB);
+                    if (!block.Contains(n))
+                    {
+                        constrainableBlocks.Add(block);
+                    }
+                }
+            }
+
+
+            foreach (var constrainableBlock in constrainableBlocks)
+            {
+                var emptyCell = GetEmptyCellsInBlock(constrainableBlock);
+                var remainingCells = RecursiveCellExclusionForNumber(n, emptyCell, currentRecursionLevel + 1, maxRecursionLevel);
+
+                if(remainingCells.Count == 0)
+                {
+                    continue;
+                }
+
+                if (constrainableBlock.XBlock == xBlock)
+                {
+                    // if the number n ist placed in the contrainable block on the same x level, n cannot be placed in this block
+                    if(remainingCells.All(c => c.Item1 == x))
+                    {
+                        return false;
+                    }
+                }
+                else // constrainableBlock.YBlock == yBlock
+                {
+                    // if the number n ist placed in the contrainable block on the same y level, n cannot be placed in this block
+                    if (remainingCells.All(c => c.Item2 == y))
+                    {
+                        return false;
+                    }
+                }
+            }
+
 
             return true;
         }
@@ -475,9 +551,9 @@ namespace SudokuSolver
 
                 var block = Block(x / 3, y / 3);
 
-                var emptyCells = GetEmptyCellsInBlock(block, xBlockOffset, yBlockOffset);
+                var emptyCells = GetEmptyCellsInBlock(block);
 
-                emptyCells.Remove((x - xBlockOffset, y - yBlockOffset));
+                emptyCells.Remove((x, y));
 
                 return FindNumberByExclusion(x, y, emptyCells, placementCheck);
             };
@@ -537,7 +613,29 @@ namespace SudokuSolver
             return null;
         }
 
-        #endregion
+        /// <summary>
+        /// Return the list of cell that the number n might be placed in (based on current contraints)
+        /// </summary>
+        /// <param name="n"></param>
+        /// <param name="emptyCellsToCheck"></param>
+        /// <param name="currentRecursionLevel"></param>
+        /// <param name="maxRecursionLevel"></param>
+        /// <returns></returns>
+        private List<(int, int)> RecursiveCellExclusionForNumber(int n, List<(int, int)> emptyCellsToCheck, int currentRecursionLevel, int maxRecursionLevel)
+        {
+            emptyCellsToCheck = emptyCellsToCheck.ToList();
 
+            foreach (var cell in emptyCellsToCheck.ToArray())
+            {
+                if (!CanNumberBePlacedWithConstraintsRecursive(cell.Item1, cell.Item2, n, currentRecursionLevel, maxRecursionLevel))
+                {
+                    emptyCellsToCheck.Remove(cell);
+                }
+            }
+
+            return emptyCellsToCheck;
+        }
+
+        #endregion
     }
 }
