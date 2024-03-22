@@ -22,3 +22,56 @@ Example Sudoku solutions with recursive stragtegy `PreferSimpleSolution`
 ![Solving Stragety with least steps to solutions](./docs/ScreenshotSolveRecursiveComplex.png)
 
 Example Sudoku solutions with recursive stragtegy `AllowMaxComplexity`
+
+
+## SolutionStrategies
+
+There are currently 10 `SolutionStrategies` (excluding `None`):
+
+- CombinedRemainingNumber
+- SimpleBlockExclusion
+- SimpleRowExclusion
+- SimpleColumnExclusion
+- BlockExclusionWithContraintsR1
+- RowExclusionWithContraintsR1
+- ColumnExclusionWithContraintsR1
+- BlockExclusionWithContraintsR2
+- RowExclusionWithContraintsR2
+- ColumnExclusionWithContraintsR2
+
+
+These can be divided into three groups of checks, that will be performed.
+
+- remaining numbers check
+- simple exclusion check
+- recursive exclusion check
+
+Each of these is explained below.
+
+### Remaining Numbers Check
+Checks for a single cell whether only one number is missing of the combined sets of row, column and box. See example below
+
+```
+  1 2 3 4 5 6 7 8 9
+--------------------
+a|    5 8 9 4 3
+b|  3
+c|  1
+d|4
+e|7
+f|6
+g|
+h|
+i|
+
+When checking with "remaining numbers check" for cell a1:
+
+Row a:        3,4,5,8,9
+Column 1:     4,6,7
+Box top left: 1,3,5
+
+Combined:     1,3,4,5,6,7,8,9
+
+If the combined set contains 8 numbers, the missing number can be set into the cell.
+in this case "2" is missing
+```
